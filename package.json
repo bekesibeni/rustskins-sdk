@@ -1,0 +1,40 @@
+{
+  "name": "rustskins-sdk",
+  "version": "1.0.0",
+  "description": "A TypeScript SDK for interacting with the RustSkins API",
+  "author": "benji",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
+    "test": "npx tsx test/rustskins.test.ts"
+  },
+  "dependencies": {
+    "@benji/stdlib": "github:bekesibeni/node-stdlib",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6",
+    "socks-proxy-agent": "^8.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
