@@ -27,3 +27,6 @@ export * from './modules/instant-sale/types.js';
 
 export { initPriceComparisonModule } from './modules/price-comparison/index.js';
 export * from './modules/price-comparison/types.js';
+
+export { initPartnerModule } from './modules/partner/index.js';
+export * from './modules/partner/types.js';

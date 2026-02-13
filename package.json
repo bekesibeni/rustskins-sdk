@@ -1,6 +1,6 @@
 {
   "name": "rustskins-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript SDK for interacting with the RustSkins API",
   "author": "benji",
   "license": "MIT",
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@benji/stdlib": "github:bekesibeni/node-stdlib",
+    "dotenv": "^17.2.4",
     "http-proxy-agent": "^7.0.2",
     "https-proxy-agent": "^7.0.6",
     "socks-proxy-agent": "^8.0.5"

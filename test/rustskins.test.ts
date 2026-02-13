@@ -1,6 +1,8 @@
 import { RustSkinsSDK } from '../src/index.js';
-
+import { config } from 'dotenv';
+config();
 const API_KEY = process.env.API_KEY;
+console.log('API_KEY:', API_KEY);
 if (!API_KEY) {
   console.error('Missing API_KEY environment variable');
   process.exit(1);
@@ -17,6 +19,16 @@ async function testUser() {
     console.log('User:', JSON.stringify(user, null, 2));
   } catch (err: any) {
     console.error('getUser error:', err.message);
+  }
+}
+
+async function testMarketplaceData() {
+  console.log('\n=== Marketplace Module ===');
+  try {
+    const data = await sdk.marketplace.getMarketplaceData({ appId: 252490 });
+    console.log(data);
+  } catch (err: any) {
+    console.error('getMarketplaceData error:', err.message);
   }
 }
 
@@ -100,13 +112,14 @@ async function main() {
   console.log('RustSkins SDK Test Suite');
   console.log('========================');
 
-  await testUser();
-  await testMarketplace();
+/*   await testUser(); */
+  await testMarketplaceData();
+/*   await testMarketplace();
   await testItems();
   await testInventory();
   await testListings();
   await testBuyOrders();
-  await testPriceComparison();
+  await testPriceComparison(); */
 
   console.log('\n========================');
   console.log('Tests complete.');

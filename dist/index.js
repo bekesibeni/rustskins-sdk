@@ -10,7 +10,9 @@ var RustSkinsClient = class {
   http;
   baseUrl;
   proxyAgents;
-  constructor({ apiKey, baseUrl = DEFAULT_BASE_URL, proxy }) {
+  projectId;
+  constructor({ apiKey, projectId, baseUrl = DEFAULT_BASE_URL, proxy }) {
+    this.projectId = projectId;
     this.baseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
     const httpOptions = {
       defaultHeaders: {
@@ -274,6 +276,53 @@ function initPriceComparisonModule(client) {
   };
 }
 
+// src/modules/partner/index.ts
+function initPartnerModule(client) {
+  const getProjectId = (providedId) => {
+    const projectId = providedId ?? client.projectId;
+    if (!projectId) {
+      throw new Error("projectId is required. Provide it in the SDK constructor or method call.");
+    }
+    return projectId;
+  };
+  return {
+    async getMarketplaceData(params) {
+      const appId = params?.appId ?? 252490;
+      return client.get(`projects/marketplace/data/v2/${appId}`);
+    },
+    async getSellData(params) {
+      const projectId = getProjectId(params.projectId);
+      const { appId = 252490 } = params;
+      return client.get(`projects/marketplace/sell-data/${appId}`, { projectId });
+    },
+    async getSteamInventory(params) {
+      return client.get("projects/inventory/steam", params);
+    },
+    async purchaseAndWithdraw(params) {
+      const projectId = getProjectId(params.projectId);
+      return client.post("projects/trade/purchase/v2", { ...params, projectId });
+    },
+    async sellItems(params) {
+      const projectId = getProjectId(params.projectId);
+      return client.post("projects/trade/sell", { ...params, projectId });
+    },
+    async getTrade(params) {
+      const projectId = getProjectId(params.projectId);
+      const { id } = params;
+      return client.get(`projects/trade/${id}`, { projectId });
+    },
+    async getTradeByOrder(params) {
+      const projectId = getProjectId(params.projectId);
+      const { id } = params;
+      return client.get(`projects/trade/order/${id}`, { projectId });
+    },
+    async getTradesByTradeUrl(params) {
+      const projectId = getProjectId(params.projectId);
+      return client.post("projects/trade/tradeurl", { ...params, projectId });
+    }
+  };
+}
+
 // src/rustskins.ts
 var RustSkinsSDK = class {
   marketplace;
@@ -284,6 +333,7 @@ var RustSkinsSDK = class {
   items;
   instantSale;
   priceComparison;
+  partner;
   client;
   constructor(options) {
     this.client = new RustSkinsClient(options);
@@ -295,12 +345,13 @@ var RustSkinsSDK = class {
     this.items = initItemsModule(this.client);
     this.instantSale = initInstantSaleModule(this.client);
     this.priceComparison = initPriceComparisonModule(this.client);
+    this.partner = initPartnerModule(this.client);
   }
   destroy() {
     this.client.destroy();
   }
 };
 
-export { RustSkinsClient, RustSkinsSDK, initBuyOrdersModule, initInstantSaleModule, initInventoryModule, initItemsModule, initListingsModule, initMarketplaceModule, initPriceComparisonModule, initUserModule };
+export { RustSkinsClient, RustSkinsSDK, initBuyOrdersModule, initInstantSaleModule, initInventoryModule, initItemsModule, initListingsModule, initMarketplaceModule, initPartnerModule, initPriceComparisonModule, initUserModule };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

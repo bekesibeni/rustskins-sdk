@@ -6,6 +6,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export interface RustSkinsClientOptions {
   apiKey: string;
+  projectId?: number;
   baseUrl?: string;
   proxy?: string;
 }
@@ -17,8 +18,10 @@ export class RustSkinsClient {
   private readonly http: HttpClient;
   private readonly baseUrl: string;
   private readonly proxyAgents?: { http?: any; https?: any };
+  public readonly projectId: number | undefined;
 
-  constructor({ apiKey, baseUrl = DEFAULT_BASE_URL, proxy }: RustSkinsClientOptions) {
+  constructor({ apiKey, projectId, baseUrl = DEFAULT_BASE_URL, proxy }: RustSkinsClientOptions) {
+    this.projectId = projectId;
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
     const httpOptions: any = {

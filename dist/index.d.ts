@@ -1,5 +1,6 @@
 interface RustSkinsClientOptions {
     apiKey: string;
+    projectId?: number;
     baseUrl?: string;
     proxy?: string;
 }
@@ -7,7 +8,8 @@ declare class RustSkinsClient {
     private readonly http;
     private readonly baseUrl;
     private readonly proxyAgents?;
-    constructor({ apiKey, baseUrl, proxy }: RustSkinsClientOptions);
+    readonly projectId: number | undefined;
+    constructor({ apiKey, projectId, baseUrl, proxy }: RustSkinsClientOptions);
     destroy(): void;
     private normalizePath;
     private buildUrl;
@@ -71,6 +73,16 @@ declare class RustSkinsSDK {
     };
     readonly priceComparison: {
         getPriceComparison(params?: GetPriceComparisonParams): Promise<PriceComparisonItem[]>;
+    };
+    readonly partner: {
+        getMarketplaceData(params?: GetMarketplaceDataV2Params): Promise<MarketplaceDataItemV2[]>;
+        getSellData(params: GetSellDataParams): Promise<InstantSellPrice[]>;
+        getSteamInventory(params: GetSteamInventoryParams): Promise<SteamInventoryItemV2[]>;
+        purchaseAndWithdraw(params: PurchaseWithdrawalV2Params): Promise<ProjectTrade[]>;
+        sellItems(params: SellItemsParams): Promise<ProjectTrade>;
+        getTrade(params: GetTradeParams): Promise<ProjectTrade>;
+        getTradeByOrder(params: GetTradeByOrderParams): Promise<ProjectTrade>;
+        getTradesByTradeUrl(params: GetTradesByTradeUrlParams): Promise<ProjectTrade[]>;
     };
     private readonly client;
     constructor(options: RustSkinsClientOptions);
@@ -553,4 +565,90 @@ declare function initPriceComparisonModule(client: RustSkinsClient): {
     getPriceComparison(params?: GetPriceComparisonParams): Promise<PriceComparisonItem[]>;
 };
 
-export { type BuyMarketplaceItemInput, type BuyMarketplaceItemsParams, type BuyOrder, type BuyOrderState, type BuyOrdersDataItem, type CancelGroupedBuyOrderInput, type CancelGroupedBuyOrdersParams, type CheckReferralParams, type CryptoCurrency, type CryptoNetwork, type DelistGroupedListingInput, type DelistGroupedListingsParams, type GetBuyOrdersDataParams, type GetBuyOrdersParams, type GetInstantSalePricesParams, type GetItemBuyOrdersParams, type GetItemListingsParams, type GetItemRecentSalesParams, type GetListingsParams, type GetMarketplaceDataParams, type GetPriceComparisonParams, type GetPurchasesParams, type GetReferralsParams, type GetSalesParams, type GetTradesParams, type GroupedBuyOrder, type GroupedInventoryItem, type GroupedListing, type InstantSaleInventory, type InstantSaleInventoryItem, type InstantSaleItem, type InstantSalePayoutType, type InstantSalePriceItem, type InstantSellSteamParams, type InventoryInstantSellItemInput, type InventoryInstantSellParams, type InventoryItem, type ItemBuyOrder, type ItemListing, type ItemRecentSale, type ListGroupedItemInput, type ListGroupedItemsParams, type MarketInstantSellItemInput, type MarketInstantSellListingsParams, type MarketplaceDataItem, type MarketplaceDataItemLocked, type MarketplaceItem, type MarketplaceOrderDirection, type MarketplaceTransaction, type PaginationParams, type PlaceBuyOrderItemInput, type PlaceBuyOrdersParams, type PriceComparisonItem, type Referral, type RequestSteamDepositItem, type ResellMarketplaceItemsParams, RustSkinsClient, type RustSkinsClientOptions, RustSkinsSDK, type RustSkinsUser, type SearchItemsParams, type SearchMarketplaceParams, type SellSteamItemsParams, type SteamDepositItem, type SteamInventoryItemV2, type SteamItemPriceSuggestions, type SteamItemType, type Trade, type TradeState, type UpdateGroupedBuyOrderInput, type UpdateGroupedBuyOrdersParams, type UpdateGroupedListingInput, type UpdateGroupedListingPricingStrategyInput, type UpdateGroupedListingsParams, type UpdateGroupedListingsPricingStrategyParams, type UpdateUserParams, type WithdrawGroupedItemInput, type WithdrawGroupedItemsParams, initBuyOrdersModule, initInstantSaleModule, initInventoryModule, initItemsModule, initListingsModule, initMarketplaceModule, initPriceComparisonModule, initUserModule };
+interface MarketplaceDataItemLockedV2 {
+    count: number;
+    price: number;
+    listingId: number;
+}
+interface MarketplaceDataItemV2 {
+    item: string;
+    image: string | null;
+    price: number;
+    steamPrice: number | null;
+    count: number;
+    itemId: number;
+    listingId: number;
+    locked?: MarketplaceDataItemLockedV2 | null;
+    prices: number[][];
+}
+interface InstantSellPrice {
+    name: string;
+    image: string | null;
+    itemId: number;
+    instantSellPrice: number;
+    instantSellAmount: number;
+}
+interface ProjectTrade {
+    id: number;
+    steamTradeId: string | null;
+    state: TradeState;
+    orderId: string;
+}
+interface GetMarketplaceDataV2Params {
+    appId?: number;
+}
+interface GetSellDataParams {
+    projectId?: number;
+    appId?: number;
+}
+interface GetSteamInventoryParams {
+    name?: string;
+    order?: string;
+    appId?: number;
+    steamId: string;
+}
+interface PurchaseWithdrawalItemV2 {
+    itemId: number;
+    maxPrices: number[][];
+}
+interface PurchaseWithdrawalV2Params {
+    items: PurchaseWithdrawalItemV2[];
+    tradeUrl: string;
+    projectId?: number;
+    orderId: string;
+}
+interface RequestSaleInputItem {
+    itemId: number;
+    amount: number;
+    price: number;
+}
+interface SellItemsParams {
+    items: RequestSaleInputItem[];
+    tradeUrl: string;
+    projectId?: number;
+}
+interface GetTradeParams {
+    id: number;
+    projectId?: number;
+}
+interface GetTradeByOrderParams {
+    id: string;
+    projectId?: number;
+}
+interface GetTradesByTradeUrlParams {
+    tradeUrl: string;
+    projectId?: number;
+}
+
+declare function initPartnerModule(client: RustSkinsClient): {
+    getMarketplaceData(params?: GetMarketplaceDataV2Params): Promise<MarketplaceDataItemV2[]>;
+    getSellData(params: GetSellDataParams): Promise<InstantSellPrice[]>;
+    getSteamInventory(params: GetSteamInventoryParams): Promise<SteamInventoryItemV2[]>;
+    purchaseAndWithdraw(params: PurchaseWithdrawalV2Params): Promise<ProjectTrade[]>;
+    sellItems(params: SellItemsParams): Promise<ProjectTrade>;
+    getTrade(params: GetTradeParams): Promise<ProjectTrade>;
+    getTradeByOrder(params: GetTradeByOrderParams): Promise<ProjectTrade>;
+    getTradesByTradeUrl(params: GetTradesByTradeUrlParams): Promise<ProjectTrade[]>;
+};
+
+export { type BuyMarketplaceItemInput, type BuyMarketplaceItemsParams, type BuyOrder, type BuyOrderState, type BuyOrdersDataItem, type CancelGroupedBuyOrderInput, type CancelGroupedBuyOrdersParams, type CheckReferralParams, type CryptoCurrency, type CryptoNetwork, type DelistGroupedListingInput, type DelistGroupedListingsParams, type GetBuyOrdersDataParams, type GetBuyOrdersParams, type GetInstantSalePricesParams, type GetItemBuyOrdersParams, type GetItemListingsParams, type GetItemRecentSalesParams, type GetListingsParams, type GetMarketplaceDataParams, type GetMarketplaceDataV2Params, type GetPriceComparisonParams, type GetPurchasesParams, type GetReferralsParams, type GetSalesParams, type GetSellDataParams, type GetSteamInventoryParams, type GetTradeByOrderParams, type GetTradeParams, type GetTradesByTradeUrlParams, type GetTradesParams, type GroupedBuyOrder, type GroupedInventoryItem, type GroupedListing, type InstantSaleInventory, type InstantSaleInventoryItem, type InstantSaleItem, type InstantSalePayoutType, type InstantSalePriceItem, type InstantSellPrice, type InstantSellSteamParams, type InventoryInstantSellItemInput, type InventoryInstantSellParams, type InventoryItem, type ItemBuyOrder, type ItemListing, type ItemRecentSale, type ListGroupedItemInput, type ListGroupedItemsParams, type MarketInstantSellItemInput, type MarketInstantSellListingsParams, type MarketplaceDataItem, type MarketplaceDataItemLocked, type MarketplaceDataItemLockedV2, type MarketplaceDataItemV2, type MarketplaceItem, type MarketplaceOrderDirection, type MarketplaceTransaction, type PaginationParams, type PlaceBuyOrderItemInput, type PlaceBuyOrdersParams, type PriceComparisonItem, type ProjectTrade, type PurchaseWithdrawalItemV2, type PurchaseWithdrawalV2Params, type Referral, type RequestSaleInputItem, type RequestSteamDepositItem, type ResellMarketplaceItemsParams, RustSkinsClient, type RustSkinsClientOptions, RustSkinsSDK, type RustSkinsUser, type SearchItemsParams, type SearchMarketplaceParams, type SellItemsParams, type SellSteamItemsParams, type SteamDepositItem, type SteamInventoryItemV2, type SteamItemPriceSuggestions, type SteamItemType, type Trade, type TradeState, type UpdateGroupedBuyOrderInput, type UpdateGroupedBuyOrdersParams, type UpdateGroupedListingInput, type UpdateGroupedListingPricingStrategyInput, type UpdateGroupedListingsParams, type UpdateGroupedListingsPricingStrategyParams, type UpdateUserParams, type WithdrawGroupedItemInput, type WithdrawGroupedItemsParams, initBuyOrdersModule, initInstantSaleModule, initInventoryModule, initItemsModule, initListingsModule, initMarketplaceModule, initPartnerModule, initPriceComparisonModule, initUserModule };

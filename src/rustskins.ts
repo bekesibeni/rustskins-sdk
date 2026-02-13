@@ -7,6 +7,7 @@ import { initUserModule } from './modules/user/index.js';
 import { initItemsModule } from './modules/items/index.js';
 import { initInstantSaleModule } from './modules/instant-sale/index.js';
 import { initPriceComparisonModule } from './modules/price-comparison/index.js';
+import { initPartnerModule } from './modules/partner/index.js';
 
 export class RustSkinsSDK {
   public readonly marketplace;
@@ -17,6 +18,7 @@ export class RustSkinsSDK {
   public readonly items;
   public readonly instantSale;
   public readonly priceComparison;
+  public readonly partner;
   private readonly client: RustSkinsClient;
 
   constructor(options: RustSkinsClientOptions) {
@@ -29,6 +31,7 @@ export class RustSkinsSDK {
     this.items = initItemsModule(this.client);
     this.instantSale = initInstantSaleModule(this.client);
     this.priceComparison = initPriceComparisonModule(this.client);
+    this.partner = initPartnerModule(this.client);
   }
 
   destroy(): void {
