@@ -28,6 +28,7 @@ export class RustSkinsClient {
       defaultHeaders: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br',
         'User-Agent': `RustSkinsSDK/${SDK_VERSION} (+https://rustskins.com)`,
         'Authorization': `Bearer ${apiKey}`,
       },
