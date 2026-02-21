@@ -112,9 +112,9 @@ async function main() {
   console.log('RustSkins SDK Test Suite');
   console.log('========================');
 
-/*   await testUser(); */
-  await testMarketplaceData();
-/*   await testMarketplace();
+  await testUser();
+/*     await testMarketplaceData();
+await testMarketplace();
   await testItems();
   await testInventory();
   await testListings();

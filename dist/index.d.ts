@@ -609,7 +609,7 @@ interface GetSteamInventoryParams {
 }
 interface PurchaseWithdrawalItemV2 {
     itemId: number;
-    maxPrices: number[][];
+    maxPrices: number[];
 }
 interface PurchaseWithdrawalV2Params {
     items: PurchaseWithdrawalItemV2[];

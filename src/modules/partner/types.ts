@@ -55,7 +55,7 @@ export interface GetSteamInventoryParams {
 
 export interface PurchaseWithdrawalItemV2 {
   itemId: number;
-  maxPrices: number[][];
+  maxPrices: number[];
 }
 
 export interface PurchaseWithdrawalV2Params {
