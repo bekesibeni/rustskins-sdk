@@ -1,147 +1,129 @@
-import { HttpClient } from '@benji/stdlib/http.js';
-import type { HttpResponse } from '@benji/stdlib/http.js';
-import { SocksProxyAgent } from 'socks-proxy-agent';
+import got from 'got';
+import type { Got, Response } from 'got';
+import { Agent as NodeHttpAgent } from 'node:http';
+import type { Agent as HttpAgent } from 'node:http';
+import { Agent as NodeHttpsAgent } from 'node:https';
+import type { Agent as HttpsAgent } from 'node:https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { SocksProxyAgent } from 'socks-proxy-agent';
+import { RustSkinsApiError } from './errors.js';
 
 export interface RustSkinsClientOptions {
   apiKey: string;
   projectId?: number;
   baseUrl?: string;
+  timeout?: number;
+  /** `socks5://`, `http://` or `https://` proxy URL; a bare `host:port` is treated as SOCKS5. */
   proxy?: string;
 }
 
-const DEFAULT_BASE_URL = 'https://api.rustskins.com';
-const SDK_VERSION = '1.0.0';
+export const DEFAULT_BASE_URL = 'https://api.rustskins.com';
+const DEFAULT_TIMEOUT_MS = 30_000;
+const SDK_VERSION = '1.1.0';
+
+type QueryValue = string | number | boolean | null | undefined;
+export type Query = Record<string, QueryValue>;
+export type Body = Record<string, unknown>;
+type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+
+interface Agents {
+  http: HttpAgent;
+  https: HttpsAgent;
+}
 
 export class RustSkinsClient {
-  private readonly http: HttpClient;
-  private readonly baseUrl: string;
-  private readonly proxyAgents?: { http?: any; https?: any };
-  public readonly projectId: number | undefined;
+  readonly baseUrl: string;
+  readonly projectId: number | undefined;
+  private readonly http: Got;
+  private readonly agents: Agents;
+  private readonly timeout: number;
 
-  constructor({ apiKey, projectId, baseUrl = DEFAULT_BASE_URL, proxy }: RustSkinsClientOptions) {
+  constructor({ apiKey, projectId, baseUrl = DEFAULT_BASE_URL, timeout = DEFAULT_TIMEOUT_MS, proxy }: RustSkinsClientOptions) {
+    if (!apiKey) throw new Error('RustSkinsClient: apiKey is required');
     this.projectId = projectId;
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    this.timeout = timeout;
+    this.agents = proxy ? buildProxyAgents(proxy) : buildDirectAgents();
 
-    const httpOptions: any = {
-      defaultHeaders: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'User-Agent': `RustSkinsSDK/${SDK_VERSION} (+https://rustskins.com)`,
-        'Authorization': `Bearer ${apiKey}`,
+    this.http = got.extend({
+      prefixUrl: this.baseUrl,
+      headers: {
+        accept: 'application/json',
+        'user-agent': `rustskins-sdk/${SDK_VERSION} (+https://github.com/bekesibeni/rustskins-sdk)`,
+        authorization: `Bearer ${apiKey}`,
       },
-    };
-
-    if (proxy) {
-      let proxyUrl = proxy;
-
-      if (!proxy.startsWith('http://') && !proxy.startsWith('https://') && !proxy.startsWith('socks5://')) {
-        proxyUrl = `socks5://${proxy}`;
-      }
-
-      if (proxyUrl.startsWith('socks5://')) {
-        const httpsAgent = new SocksProxyAgent(proxyUrl);
-        const httpAgent = new SocksProxyAgent(proxyUrl);
-        this.proxyAgents = { https: httpsAgent, http: httpAgent };
-      } else {
-        const httpsAgent = new HttpsProxyAgent(proxyUrl);
-        const httpAgent = new HttpProxyAgent(proxyUrl);
-        this.proxyAgents = { https: httpsAgent, http: httpAgent };
-      }
-
-      httpOptions.httpsAgent = this.proxyAgents.https;
-      httpOptions.httpAgent = this.proxyAgents.http;
-    }
-
-    this.http = new HttpClient(httpOptions);
+      agent: { http: this.agents.http, https: this.agents.https },
+      responseType: 'json',
+      throwHttpErrors: false,
+      followRedirect: false,
+      // Never resend: a replayed purchase POST buys twice.
+      retry: { limit: 0 },
+    });
   }
 
   destroy(): void {
     try {
-      this.proxyAgents?.http?.destroy?.();
+      this.agents.http.destroy();
     } finally {
-      this.proxyAgents?.https?.destroy?.();
+      this.agents.https.destroy();
     }
   }
 
-  private normalizePath(path: string): string {
-    return path.replace(/^\/+/, '');
+  async get<T>(path: string, query?: Query): Promise<T> {
+    return unwrap<T>(await this.send('GET', path, { query }));
   }
 
-  private buildUrl(path: string, query?: Record<string, any>): string {
-    const cleanPath = this.normalizePath(path);
-    const url = new URL(cleanPath, this.baseUrl);
+  async post<T>(path: string, body?: Body): Promise<T> {
+    return unwrap<T>(await this.send('POST', path, { body }));
+  }
 
-    if (query) {
-      for (const [key, value] of Object.entries(query)) {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      }
+  async patch<T>(path: string, body?: Body): Promise<T> {
+    return unwrap<T>(await this.send('PATCH', path, { body }));
+  }
+
+  async delete<T>(path: string, body?: Body): Promise<T> {
+    return unwrap<T>(await this.send('DELETE', path, { body }));
+  }
+
+  private send(method: Method, path: string, options: { query?: Query | undefined; body?: Body | undefined }): Promise<Response<unknown>> {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.query ?? {})) {
+      if (value !== undefined && value !== null) searchParams.append(key, String(value));
     }
-
-    return url.toString();
-  }
-
-  private assertOk(response: HttpResponse): void {
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      const body = (response as HttpResponse & { jsonBody?: unknown }).jsonBody;
-      throw new Error(
-        `RustSkins API error ${response.statusCode}: ${JSON.stringify(body)}`,
-      );
-    }
-  }
-
-  async get<T = any>(path: string, query?: Record<string, any>): Promise<T> {
-    const url = this.buildUrl(path, query);
-
-    const response = await this.http.request({
-      method: 'GET',
-      url,
+    return this.http(path.replace(/^\/+/, ''), {
+      method,
+      searchParams,
+      timeout: { request: this.timeout },
+      ...(options.body ? { json: options.body } : {}),
     });
-
-    this.assertOk(response);
-    return (response as HttpResponse & { jsonBody?: T }).jsonBody as T;
   }
+}
 
-  async post<T = any>(path: string, body?: Record<string, any>): Promise<T> {
-    const url = this.buildUrl(path);
-
-    const response = await this.http.request({
-      method: 'POST',
-      url,
-      json: body as Record<string, any>,
-    });
-
-    this.assertOk(response);
-    return (response as HttpResponse & { jsonBody?: T }).jsonBody as T;
+function unwrap<T>(response: Response<unknown>): T {
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw new RustSkinsApiError(response.statusCode, response.body ?? null, parseRetryAfter(response.headers['retry-after']));
   }
+  return response.body as T;
+}
 
-  async patch<T = any>(path: string, body?: Record<string, any>): Promise<T> {
-    const url = this.buildUrl(path);
+function parseRetryAfter(value: string | string[] | undefined): number | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return null;
+  const seconds = Number(raw);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds);
+  const at = Date.parse(raw);
+  return Number.isFinite(at) ? Math.max(0, Math.ceil((at - Date.now()) / 1000)) : null;
+}
 
-    const response = await this.http.request({
-      method: 'PATCH',
-      url,
-      json: body as Record<string, any>,
-    });
+function buildDirectAgents(): Agents {
+  return { http: new NodeHttpAgent({ keepAlive: true }), https: new NodeHttpsAgent({ keepAlive: true }) };
+}
 
-    this.assertOk(response);
-    return (response as HttpResponse & { jsonBody?: T }).jsonBody as T;
+function buildProxyAgents(proxy: string): Agents {
+  const proxyUrl = /^(https?|socks5h?):\/\//.test(proxy) ? proxy : `socks5://${proxy}`;
+  if (proxyUrl.startsWith('socks5')) {
+    return { http: new SocksProxyAgent(proxyUrl), https: new SocksProxyAgent(proxyUrl) };
   }
-
-  async delete<T = any>(path: string, body?: Record<string, any>): Promise<T> {
-    const url = this.buildUrl(path);
-
-    const response = await this.http.request({
-      method: 'DELETE',
-      url,
-      json: body as Record<string, any>,
-    });
-
-    this.assertOk(response);
-    return (response as HttpResponse & { jsonBody?: T }).jsonBody as T;
-  }
+  return { http: new HttpProxyAgent(proxyUrl), https: new HttpsProxyAgent(proxyUrl) };
 }

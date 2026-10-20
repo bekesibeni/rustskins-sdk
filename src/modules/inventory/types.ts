@@ -1,4 +1,4 @@
-// ── Entities ────────────────────────────────────────────
+import type { PaginationParams } from '../../core/types.js';
 
 export interface InventoryItem {
   id: number;
@@ -13,8 +13,8 @@ export interface GroupedInventoryItem {
   itemId: number;
   name: string;
   appid: number;
-  classid: string | null;
   amount: number;
+  classid?: string | null;
 }
 
 export interface SteamItemPriceSuggestions {
@@ -26,6 +26,7 @@ export interface SteamItemPriceSuggestions {
   steamPriceDiscount: number | null;
 }
 
+/** `steamItemId` is the RustSkins catalog item id, not a Steam asset id. */
 export interface SteamInventoryItemV2 {
   steamItemId: number;
   name: string;
@@ -41,15 +42,21 @@ export interface SteamInventoryItemV2 {
   suggestedPrices?: SteamItemPriceSuggestions | null;
 }
 
-// ── Params ──────────────────────────────────────────────
+export interface GetInventoryParams extends PaginationParams {}
+
+export interface GetSteamInventoryV2Params {
+  appId?: number;
+  addSuggestedPrices?: boolean;
+}
 
 export interface RequestSteamDepositItem {
   steamItemId: number;
+  itemTypeId?: number;
   amount: number;
-  price?: number | null;
-  pricingStrategy: string | null;
-  updateInterval: number | null;
-  stopPrice: number | null;
+  price: number;
+  pricingStrategy?: string | null;
+  updateInterval?: number | null;
+  stopPrice?: number | null;
 }
 
 export interface SellSteamItemsParams {
@@ -69,9 +76,9 @@ export interface ListGroupedItemInput {
   itemId: number;
   amount: number;
   price: number;
-  pricingStrategy: string | null;
-  updateInterval: number | null;
-  stopPrice: number | null;
+  pricingStrategy?: string | null;
+  updateInterval?: number | null;
+  stopPrice?: number | null;
 }
 
 export interface ListGroupedItemsParams {

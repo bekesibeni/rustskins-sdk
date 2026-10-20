@@ -1,7 +1,7 @@
 import type { RustSkinsClient } from '../../core/client.js';
 import type {
   RustSkinsUser,
-  Trade,
+  UserTrade,
   Referral,
   UpdateUserParams,
   GetTradesParams,
@@ -16,15 +16,19 @@ export function initUserModule(client: RustSkinsClient) {
     },
 
     async updateUser(params: UpdateUserParams): Promise<RustSkinsUser> {
-      return client.patch('external/user', params as Record<string, any>);
+      return client.patch('external/user', { tradeUrl: params.tradeUrl, email: params.email });
     },
 
-    async getTrades(params?: GetTradesParams): Promise<Trade[]> {
-      return client.get('external/user/trades', params);
+    async getTrades(params?: GetTradesParams): Promise<UserTrade[]> {
+      return client.get('external/user/trades', {
+        deposit: params?.deposit,
+        page: params?.page,
+        take: params?.take,
+      });
     },
 
     async getReferrals(params?: GetReferralsParams): Promise<Referral[]> {
-      return client.get('external/user/referrals', params);
+      return client.get('external/user/referrals', { page: params?.page, take: params?.take });
     },
 
     async checkReferral(params: CheckReferralParams): Promise<boolean> {

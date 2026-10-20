@@ -1,7 +1,5 @@
 import type { PaginationParams, InstantSalePayoutType, CryptoCurrency, CryptoNetwork } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface InstantSalePriceItem {
   id: number;
   appId: number | null;
@@ -36,8 +34,6 @@ export interface InstantSaleItem {
   name: string;
   amount: number;
 }
-
-// ── Params ──────────────────────────────────────────────
 
 export interface GetInstantSalePricesParams extends PaginationParams {
   name?: string;

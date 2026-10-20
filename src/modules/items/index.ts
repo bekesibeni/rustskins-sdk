@@ -8,27 +8,34 @@ import type {
   ItemBuyOrder,
   ItemListing,
   ItemRecentSale,
+  PriceLimit,
 } from './types.js';
 
 export function initItemsModule(client: RustSkinsClient) {
   return {
     async searchItems(params?: SearchItemsParams): Promise<SteamItemType[]> {
-      return client.get('external/items', params);
+      return client.get('external/items', {
+        name: params?.name,
+        appId: params?.appId,
+        page: params?.page,
+        take: params?.take,
+      });
     },
 
     async getItemBuyOrders(params: GetItemBuyOrdersParams): Promise<ItemBuyOrder[]> {
-      const { id, ...query } = params;
-      return client.get(`external/items/${id}/buy-orders`, query);
+      return client.get(`external/items/${params.id}/buy-orders`, { page: params.page, take: params.take });
     },
 
     async getItemListings(params: GetItemListingsParams): Promise<ItemListing[]> {
-      const { id, ...query } = params;
-      return client.get(`external/items/${id}/listings`, query);
+      return client.get(`external/items/${params.id}/listings`, { page: params.page, take: params.take });
     },
 
     async getItemRecentSales(params: GetItemRecentSalesParams): Promise<ItemRecentSale[]> {
-      const { id, ...query } = params;
-      return client.get(`external/items/${id}/recent-sales`, query);
+      return client.get(`external/items/${params.id}/recent-sales`, { page: params.page, take: params.take });
+    },
+
+    async getPriceLimits(appId = 252490): Promise<PriceLimit[]> {
+      return client.get(`external/item-types/price-limits/${appId}`);
     },
   };
 }

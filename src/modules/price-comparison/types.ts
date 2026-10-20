@@ -1,7 +1,5 @@
 import type { PaginationParams } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface PriceComparisonItem {
   name: string;
   rustskinsPrice: number | null;
@@ -13,8 +11,6 @@ export interface PriceComparisonItem {
   rusttmPrice: number | null;
   lisskinsPrice: number | null;
 }
-
-// ── Params ──────────────────────────────────────────────
 
 export interface GetPriceComparisonParams extends PaginationParams {
   name?: string;

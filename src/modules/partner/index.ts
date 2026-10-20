@@ -17,9 +17,7 @@ import type { SteamInventoryItemV2 } from '../inventory/types.js';
 export function initPartnerModule(client: RustSkinsClient) {
   const getProjectId = (providedId?: number): number => {
     const projectId = providedId ?? client.projectId;
-    if (!projectId) {
-      throw new Error('projectId is required. Provide it in the SDK constructor or method call.');
-    }
+    if (!projectId) throw new Error('projectId is required. Provide it in the SDK constructor or method call.');
     return projectId;
   };
 
@@ -31,39 +29,42 @@ export function initPartnerModule(client: RustSkinsClient) {
 
     async getSellData(params: GetSellDataParams): Promise<InstantSellPrice[]> {
       const projectId = getProjectId(params.projectId);
-      const { appId = 252490 } = params;
+      const appId = params.appId ?? 252490;
       return client.get(`projects/marketplace/sell-data/${appId}`, { projectId });
     },
 
     async getSteamInventory(params: GetSteamInventoryParams): Promise<SteamInventoryItemV2[]> {
-      return client.get('projects/inventory/steam', params as Record<string, any>);
+      return client.get('projects/inventory/steam', {
+        name: params.name,
+        order: params.order,
+        appId: params.appId,
+        steamId: params.steamId,
+      });
     },
 
     async purchaseAndWithdraw(params: PurchaseWithdrawalV2Params): Promise<ProjectTrade[]> {
       const projectId = getProjectId(params.projectId);
-      return client.post('projects/trade/purchase/v2', { ...params, projectId } as unknown as Record<string, any>);
+      return client.post('projects/trade/purchase/v2', { ...params, projectId });
     },
 
     async sellItems(params: SellItemsParams): Promise<ProjectTrade> {
       const projectId = getProjectId(params.projectId);
-      return client.post('projects/trade/sell', { ...params, projectId } as unknown as Record<string, any>);
+      return client.post('projects/trade/sell', { ...params, projectId });
     },
 
     async getTrade(params: GetTradeParams): Promise<ProjectTrade> {
       const projectId = getProjectId(params.projectId);
-      const { id } = params;
-      return client.get(`projects/trade/${id}`, { projectId });
+      return client.get(`projects/trade/${params.id}`, { projectId });
     },
 
     async getTradeByOrder(params: GetTradeByOrderParams): Promise<ProjectTrade> {
       const projectId = getProjectId(params.projectId);
-      const { id } = params;
-      return client.get(`projects/trade/order/${id}`, { projectId });
+      return client.get(`projects/trade/order/${params.id}`, { projectId });
     },
 
     async getTradesByTradeUrl(params: GetTradesByTradeUrlParams): Promise<ProjectTrade[]> {
       const projectId = getProjectId(params.projectId);
-      return client.post('projects/trade/tradeurl', { ...params, projectId } as unknown as Record<string, any>);
+      return client.post('projects/trade/tradeurl', { ...params, projectId });
     },
   };
 }

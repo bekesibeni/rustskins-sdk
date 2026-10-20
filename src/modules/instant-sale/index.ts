@@ -12,7 +12,12 @@ import type {
 export function initInstantSaleModule(client: RustSkinsClient) {
   return {
     async getPrices(params?: GetInstantSalePricesParams): Promise<InstantSalePriceItem[]> {
-      return client.get('external/instant-sale/prices', params);
+      return client.get('external/instant-sale/prices', {
+        name: params?.name,
+        appId: params?.appId,
+        page: params?.page,
+        take: params?.take,
+      });
     },
 
     async getSteamInventory(): Promise<InstantSaleInventory> {
@@ -20,15 +25,15 @@ export function initInstantSaleModule(client: RustSkinsClient) {
     },
 
     async instantSellSteam(params: InstantSellSteamParams): Promise<any> {
-      return client.post('external/instant-sale/steam', params as unknown as Record<string, any>);
+      return client.post('external/instant-sale/steam', { ...params });
     },
 
     async instantSellInventory(params: InventoryInstantSellParams): Promise<InstantSaleItem[]> {
-      return client.post('external/instant-sale/inventory/v2', params as unknown as Record<string, any>);
+      return client.post('external/instant-sale/inventory/v2', { items: params.items });
     },
 
     async instantSellListings(params: MarketInstantSellListingsParams): Promise<InstantSaleItem[]> {
-      return client.post('external/instant-sale/listings/v2', params as unknown as Record<string, any>);
+      return client.post('external/instant-sale/listings/v2', { listings: params.listings });
     },
   };
 }

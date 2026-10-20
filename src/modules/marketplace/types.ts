@@ -1,7 +1,5 @@
 import type { PaginationParams, MarketplaceOrderDirection } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface MarketplaceDataItemLocked {
   count: number;
   price: number;
@@ -17,6 +15,16 @@ export interface MarketplaceDataItem {
   itemId: number;
   listingId: number;
   locked?: MarketplaceDataItemLocked | null;
+}
+
+export interface MarketplaceDataV2Item {
+  name: string;
+  itemId: number;
+  itemVariantId: number;
+  amount: number;
+  price: number;
+  steamPrice: number | null;
+  image: string | null;
 }
 
 export interface MarketplaceItem {
@@ -40,9 +48,11 @@ export interface MarketplaceTransaction {
   date: string;
 }
 
-// ── Params ──────────────────────────────────────────────
-
 export interface GetMarketplaceDataParams {
+  appId?: number;
+}
+
+export interface GetMarketplaceDataV2QueryParams {
   appId?: number;
 }
 

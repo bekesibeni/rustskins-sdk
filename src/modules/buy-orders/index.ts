@@ -17,19 +17,19 @@ export function initBuyOrdersModule(client: RustSkinsClient) {
     },
 
     async getBuyOrders(params?: GetBuyOrdersParams): Promise<GroupedBuyOrder[]> {
-      return client.get('external/buy-orders/v2', params);
+      return client.get('external/buy-orders/v2', { name: params?.name, page: params?.page, take: params?.take });
     },
 
     async createBuyOrders(params: PlaceBuyOrdersParams): Promise<any> {
-      return client.post('external/buy-orders/v2', params as unknown as Record<string, any>);
+      return client.post('external/buy-orders/v2', { items: params.items });
     },
 
     async updateBuyOrders(params: UpdateGroupedBuyOrdersParams): Promise<any> {
-      return client.patch('external/buy-orders/v2', params as unknown as Record<string, any>);
+      return client.patch('external/buy-orders/v2', { orders: params.orders });
     },
 
     async cancelBuyOrders(params: CancelGroupedBuyOrdersParams): Promise<any> {
-      return client.delete('external/buy-orders/v2', params as unknown as Record<string, any>);
+      return client.delete('external/buy-orders/v2', { orders: params.orders });
     },
 
     async cancelAllBuyOrders(): Promise<any> {

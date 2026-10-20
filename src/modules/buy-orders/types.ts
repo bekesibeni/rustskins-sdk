@@ -1,7 +1,5 @@
 import type { PaginationParams, BuyOrderState } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface BuyOrdersDataItem {
   item: string;
   price: number;
@@ -25,8 +23,6 @@ export interface BuyOrder {
   state: BuyOrderState;
   yours: boolean;
 }
-
-// ── Params ──────────────────────────────────────────────
 
 export interface GetBuyOrdersDataParams {
   appId?: number;

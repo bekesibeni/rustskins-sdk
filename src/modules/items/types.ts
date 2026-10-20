@@ -1,13 +1,19 @@
 import type { PaginationParams, BuyOrderState } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface SteamItemType {
   id: number;
   appId: number | null;
   image: string | null;
   name: string;
   steamPrice: number | null;
+}
+
+export interface PriceLimit {
+  name: string;
+  itemId: number;
+  typeId: number;
+  minPrice?: number | null;
+  maxPrice?: number | null;
 }
 
 export interface ItemBuyOrder {
@@ -36,8 +42,6 @@ export interface ItemRecentSale {
   price: number;
   date: string;
 }
-
-// ── Params ──────────────────────────────────────────────
 
 export interface SearchItemsParams extends PaginationParams {
   name?: string;

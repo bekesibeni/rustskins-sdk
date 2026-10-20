@@ -1,6 +1,4 @@
-import type { PaginationParams, TradeState } from '../../core/types.js';
-
-// ── Entities ────────────────────────────────────────────
+import type { PaginationParams } from '../../core/types.js';
 
 export interface RustSkinsUser {
   id: number;
@@ -10,25 +8,28 @@ export interface RustSkinsUser {
   balance: number;
 }
 
-export interface Trade {
+export interface UserTrade {
   id: number;
-  steamTradeId: string | null;
-  state: TradeState;
+  state: string;
+  steamTradeId?: string | null;
 }
+
+/** @deprecated Use `UserTrade`. */
+export type Trade = UserTrade;
 
 export interface Referral {
   steamId: string;
   totalDeposited: number;
 }
 
-// ── Params ──────────────────────────────────────────────
-
 export interface UpdateUserParams {
   tradeUrl?: string | null;
   email?: string | null;
 }
 
-export interface GetTradesParams extends PaginationParams {}
+export interface GetTradesParams extends PaginationParams {
+  deposit?: boolean;
+}
 
 export interface GetReferralsParams extends PaginationParams {}
 

@@ -1,6 +1,7 @@
 export { RustSkinsSDK } from './rustskins.js';
-export { RustSkinsClient } from './core/client.js';
+export { RustSkinsClient, DEFAULT_BASE_URL } from './core/client.js';
 export type { RustSkinsClientOptions } from './core/client.js';
+export { RustSkinsApiError } from './core/errors.js';
 
 export * from './core/types.js';
 

@@ -1,24 +1,21 @@
 import type { PaginationParams } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface GroupedListing {
   itemId: number;
   name: string;
-  appid: number;
-  classid: string | null;
   amount: number;
   price: number;
-  sellerFeePercentage: number;
   sellerFeePerItem: number;
-  pricingStrategy: string | null;
-  updateInterval: string | null;
-  stopPrice: number | null;
+  appid?: number;
+  classid?: string | null;
+  sellerFeePercentage?: number;
+  pricingStrategy?: string | null;
+  updateInterval?: string | null;
+  stopPrice?: number | null;
 }
 
-// ── Params ──────────────────────────────────────────────
-
 export interface GetListingsParams extends PaginationParams {
+  appId?: number;
   name?: string;
 }
 
@@ -27,10 +24,10 @@ export interface UpdateGroupedListingInput {
   amount: number;
   price: number;
   sellerFeePerItem: number;
-  pricingStrategy: string | null;
-  updateInterval: string | null;
-  stopPrice: number | null;
   newPrice: number;
+  pricingStrategy?: string | null;
+  updateInterval?: string | null;
+  stopPrice?: number | null;
 }
 
 export interface UpdateGroupedListingsParams {
@@ -59,9 +56,9 @@ export interface DelistGroupedListingInput {
   amount: number;
   price: number;
   sellerFeePerItem: number;
-  pricingStrategy: string | null;
-  updateInterval: string | null;
-  stopPrice: number | null;
+  pricingStrategy?: string | null;
+  updateInterval?: string | null;
+  stopPrice?: number | null;
 }
 
 export interface DelistGroupedListingsParams {

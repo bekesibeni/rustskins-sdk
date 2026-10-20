@@ -10,19 +10,24 @@ import type {
 export function initListingsModule(client: RustSkinsClient) {
   return {
     async getListings(params?: GetListingsParams): Promise<GroupedListing[]> {
-      return client.get('external/listings/v2', params);
+      return client.get('external/listings/v3', {
+        appId: params?.appId ?? 252490,
+        name: params?.name,
+        page: params?.page,
+        take: params?.take,
+      });
     },
 
     async updateListings(params: UpdateGroupedListingsParams): Promise<any> {
-      return client.patch('external/listings/v2', params as unknown as Record<string, any>);
+      return client.patch('external/listings/v2', { listings: params.listings });
     },
 
     async delistListings(params: DelistGroupedListingsParams): Promise<any> {
-      return client.delete('external/listings/v2', params as unknown as Record<string, any>);
+      return client.delete('external/listings/v2', { listings: params.listings });
     },
 
     async updatePricingStrategy(params: UpdateGroupedListingsPricingStrategyParams): Promise<any> {
-      return client.patch('external/listings/pricing-strategy', params as unknown as Record<string, any>);
+      return client.patch('external/listings/pricing-strategy', { listings: params.listings });
     },
   };
 }

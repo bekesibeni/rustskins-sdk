@@ -1,6 +1,6 @@
 # RustSkins SDK
 
-A production-ready TypeScript SDK for the RustSkins API with full type safety, keep-alive sessions, and proxy support.
+A TypeScript SDK for the RustSkins API. Transport is got 16 with keep-alive agents, no retries and no redirects.
 
 ## Installation
 
@@ -13,10 +13,9 @@ npm install rustskins-sdk
 - ✅ **Full TypeScript support** - Every endpoint fully typed
 - ✅ **Keep-alive sessions** - Optimized connection pooling
 - ✅ **Proxy support** - SOCKS5, HTTP, HTTPS with auto-detection
-- ✅ **45 endpoints** across 9 modules
 - ✅ **Bearer token authentication**
 - ✅ **ESM-only** - Modern, tree-shakeable
-- ✅ **Node 20+** required
+- ✅ **Node 22+** required
 
 ## Quick Start
 
@@ -49,7 +48,7 @@ sdk.destroy();
 ```typescript
 await sdk.user.getUser();
 await sdk.user.updateUser({ email: 'new@email.com' });
-await sdk.user.getTrades({ page: 1, take: 50 });
+await sdk.user.getTrades({ deposit: true, page: 1, take: 500 });
 await sdk.user.getReferrals({ page: 1 });
 await sdk.user.checkReferral({ steamId: '76561197960287930' });
 ```
@@ -58,6 +57,7 @@ await sdk.user.checkReferral({ steamId: '76561197960287930' });
 
 ```typescript
 await sdk.marketplace.getMarketplaceData({ appId: 252490 });
+await sdk.marketplace.getMarketplaceDataV2();
 await sdk.marketplace.getTf2MarketplaceData();
 await sdk.marketplace.searchItems({ name: 'AK', take: 10 });
 await sdk.marketplace.getSales({ page: 1 });
@@ -69,8 +69,8 @@ await sdk.marketplace.resell({ items: [...], tradeUrl: '...' });
 ### Inventory Module
 
 ```typescript
-await sdk.inventory.getInventory();
-await sdk.inventory.getSteamInventory();
+await sdk.inventory.getInventory({ page: 1, take: 500 });
+await sdk.inventory.getSteamInventory({ appId: 252490, addSuggestedPrices: true });
 await sdk.inventory.sellSteamItems({ items: [...] });
 await sdk.inventory.sellItems({ items: [...] });
 await sdk.inventory.withdrawItems({ items: [...] });
@@ -79,7 +79,7 @@ await sdk.inventory.withdrawItems({ items: [...] });
 ### Listings Module
 
 ```typescript
-await sdk.listings.getListings({ page: 1, take: 50 });
+await sdk.listings.getListings({ appId: 252490, page: 1, take: 500 });
 await sdk.listings.updateListings({ listings: [...] });
 await sdk.listings.delistListings({ listings: [...] });
 await sdk.listings.updatePricingStrategy({ listings: [...] });
@@ -103,6 +103,7 @@ await sdk.items.searchItems({ name: 'AK', take: 10 });
 await sdk.items.getItemBuyOrders({ id: 123, page: 1 });
 await sdk.items.getItemListings({ id: 123, page: 1 });
 await sdk.items.getItemRecentSales({ id: 123, page: 1 });
+await sdk.items.getPriceLimits(252490);
 ```
 
 ### Instant Sale Module
@@ -161,11 +162,15 @@ new RustSkinsSDK({
 
 ## Error Handling
 
+Any non-2xx response throws `RustSkinsApiError` with `status`, the parsed `body` and `retryAfterSec` (from `Retry-After`, `null` when absent). Requests are never retried.
+
 ```typescript
+import { RustSkinsApiError } from 'rustskins-sdk';
+
 try {
-  const user = await sdk.user.getUser();
+  await sdk.user.getUser();
 } catch (error) {
-  console.error('API Error:', error.message);
+  if (error instanceof RustSkinsApiError && error.isRateLimited) console.log(error.retryAfterSec);
 }
 ```
 

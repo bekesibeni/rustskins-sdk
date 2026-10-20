@@ -1,7 +1,5 @@
 import type { TradeState } from '../../core/types.js';
 
-// ── Entities ────────────────────────────────────────────
-
 export interface MarketplaceDataItemLockedV2 {
   count: number;
   price: number;
@@ -34,8 +32,6 @@ export interface ProjectTrade {
   state: TradeState;
   orderId: string;
 }
-
-// ── Params ──────────────────────────────────────────────
 
 export interface GetMarketplaceDataV2Params {
   appId?: number;
