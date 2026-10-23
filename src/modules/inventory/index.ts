@@ -31,7 +31,7 @@ export function initInventoryModule(client: RustSkinsClient) {
       return client.post('external/inventory/sell/v2', { items: params.items });
     },
 
-    async withdrawItems(params: WithdrawGroupedItemsParams): Promise<any> {
+    async withdrawItems(params: WithdrawGroupedItemsParams): Promise<UserTrade[]> {
       return client.post('external/inventory/withdraw/v2', { items: params.items });
     },
   };

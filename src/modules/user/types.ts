@@ -1,4 +1,4 @@
-import type { PaginationParams } from '../../core/types.js';
+import type { PaginationParams, TradeState } from '../../core/types.js';
 
 export interface RustSkinsUser {
   id: number;
@@ -10,7 +10,7 @@ export interface RustSkinsUser {
 
 export interface UserTrade {
   id: number;
-  state: string;
+  state: TradeState;
   steamTradeId?: string | null;
 }
 

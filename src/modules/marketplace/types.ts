@@ -39,6 +39,8 @@ export interface MarketplaceItem {
   stopPrice: number | null;
 }
 
+export type MarketplaceTransactionState = 'refunded' | 'pending' | 'completed';
+
 export interface MarketplaceTransaction {
   id: number;
   itemId: number;
@@ -46,6 +48,8 @@ export interface MarketplaceTransaction {
   amount: number;
   price: number;
   date: string;
+  state?: MarketplaceTransactionState;
+  orderId?: string | null;
 }
 
 export interface GetMarketplaceDataParams {

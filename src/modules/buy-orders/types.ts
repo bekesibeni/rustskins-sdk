@@ -15,6 +15,8 @@ export interface GroupedBuyOrder {
   keepActive: boolean;
 }
 
+export type GroupedBuyOrderState = 'active' | 'paused';
+
 export interface BuyOrder {
   id: number;
   itemId: number;
@@ -45,8 +47,9 @@ export interface PlaceBuyOrdersParams {
 
 export interface UpdateGroupedBuyOrderInput {
   itemId: number;
+  itemTypeId?: number;
   amount: number;
-  active: boolean;
+  state: GroupedBuyOrderState;
   price: number;
   newPrice: number;
   keepActive: boolean;
@@ -59,9 +62,11 @@ export interface UpdateGroupedBuyOrdersParams {
 
 export interface CancelGroupedBuyOrderInput {
   itemId: number;
+  itemTypeId?: number;
   amount: number;
-  active: boolean;
+  state: GroupedBuyOrderState;
   price: number;
+  keepActive?: boolean;
 }
 
 export interface CancelGroupedBuyOrdersParams {
